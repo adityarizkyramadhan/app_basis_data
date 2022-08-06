@@ -8,6 +8,11 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
+type tableMahasiswa struct {
+	db  *sql.DB
+	ctx context.Context
+}
+
 func main() {
 	db, err := sql.Open("mysql", "root:@/playground_database")
 	ctx := context.Background()
@@ -16,7 +21,7 @@ func main() {
 	}
 	fmt.Println("connected to the database")
 	defer db.Close()
-	tableMahasiswa := fmt.Sprintln(
+	createtableMahasiswa := fmt.Sprintln(
 		`CREATE TABLE IF NOT EXISTS mahasiswa (
 			id INTEGER PRIMARY KEY AUTO_INCREMENT,
 			nama TEXT NOT NULL,
@@ -28,23 +33,24 @@ func main() {
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 			)`)
-	res, err := db.ExecContext(ctx, tableMahasiswa)
+	res, err := db.ExecContext(ctx, createtableMahasiswa)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(res)
-	res, err = inputMahasiswa("aditya rizky", "215150201111007", "aditya@gmail.com", "Teknik Informatika", "FILKOM", db, ctx)
+	dbMahasiswa := tableMahasiswa{db: db, ctx: ctx}
+	res, err = dbMahasiswa.inputMahasiswa("aditya ramadhan", "215150201111543007", "adityarrr@gmail.com", "Teknik Informatika", "FILKOM")
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(res)
+	fmt.Println(res.LastInsertId())
 }
 
-func inputMahasiswa(nama, nim, email, jurusan, fakultas string, db *sql.DB, ctx context.Context) (sql.Result, error) {
+func (t *tableMahasiswa) inputMahasiswa(nama, nim, email, jurusan, fakultas string) (sql.Result, error) {
 	inputMahasiswa := fmt.Sprintf(`
 	INSERT INTO mahasiswa(nama, nim, email, jurusan, fakultas)
 	VALUES("%s", "%s", "%s", "%s", "%s")`, nama, nim, email, jurusan, fakultas)
-	res, err := db.ExecContext(ctx, inputMahasiswa)
+	res, err := t.db.ExecContext(t.ctx, inputMahasiswa)
 	if err != nil {
 		return nil, err
 	}
