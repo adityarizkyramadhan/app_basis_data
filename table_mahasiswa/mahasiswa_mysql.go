@@ -11,6 +11,18 @@ type tableMahasiswa struct {
 	ctx context.Context
 }
 
+type Mahasiswa struct {
+	ID        int64  `json:"id"`
+	Nama      string `json:"nama"`
+	Nim       string `json:"nim"`
+	Email     string `json:"email"`
+	Jurusan   string `json:"jurusan"`
+	Fakultas  string `json:"fakultas"`
+	IsActive  bool   `json:"is_active"`
+	CreatedAt string `json:"created_at"`
+	UpdatedAt string `json:"updated_at"`
+}
+
 func NewTableMahasiswa(db *sql.DB, ctx context.Context) (*tableMahasiswa, error) {
 	createtableMahasiswa := fmt.Sprintln(
 		`CREATE TABLE IF NOT EXISTS mahasiswa (
@@ -48,6 +60,37 @@ func (t *tableMahasiswa) UpdateMahasiswaIsActive(nim string, isActive bool) (sql
 	SET is_active = %t
 	WHERE nim = "%s"`, isActive, nim)
 	res, err := t.db.ExecContext(t.ctx, updateMahasiswa)
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
+}
+
+func (t *tableMahasiswa) ReadAllMahasiswa() ([]Mahasiswa, error) {
+	readAllMahasiswa := fmt.Sprintln(`
+	SELECT * FROM mahasiswa`)
+	rows, err := t.db.QueryContext(t.ctx, readAllMahasiswa)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var mahasiswas []Mahasiswa
+	for rows.Next() {
+		var mahasiswa Mahasiswa
+		err := rows.Scan(&mahasiswa.ID, &mahasiswa.Nama, &mahasiswa.Nim, &mahasiswa.Email, &mahasiswa.Jurusan, &mahasiswa.Fakultas, &mahasiswa.IsActive, &mahasiswa.CreatedAt, &mahasiswa.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		mahasiswas = append(mahasiswas, mahasiswa)
+	}
+	return mahasiswas, nil
+}
+
+func (t *tableMahasiswa) DeleteMahasiswa(nim string) (sql.Result, error) {
+	deleteMahasiswa := fmt.Sprintf(`
+	DELETE FROM mahasiswa
+	WHERE nim = "%s"`, nim)
+	res, err := t.db.ExecContext(t.ctx, deleteMahasiswa)
 	if err != nil {
 		return nil, err
 	}

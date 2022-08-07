@@ -21,13 +21,18 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	_, err = mahasiswa.InputMahasiswa("Rizki", "12345", "rizky@gmail.com", "Teknik Informatika", "FILKOM")
+	// _, err = mahasiswa.InputMahasiswa("Rizki", "12345", "rizky@gmail.com", "Teknik Informatika", "FILKOM")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// _, err = mahasiswa.UpdateMahasiswaIsActive("12345", false)
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println("data inserted with status mahasiswa.is_active = false")\
+	dataMahasiswa, err := mahasiswa.ReadAllMahasiswa()
 	if err != nil {
 		panic(err)
 	}
-	_, err = mahasiswa.UpdateMahasiswaIsActive("12345", false)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println("data inserted with status mahasiswa.is_active = false")
+	fmt.Println(dataMahasiswa)
 }
