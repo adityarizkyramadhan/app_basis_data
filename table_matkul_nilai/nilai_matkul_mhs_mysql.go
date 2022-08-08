@@ -54,12 +54,12 @@ func (t *tableMatkulNilai) UpdateNilai(id int, nilai int) (sql.Result, error) {
 }
 
 type ScanTableMatkulNilai struct {
-	id          int
-	nilai       int
-	mahasiswaID int
-	mataKuliah  string
-	createdAt   string
-	updatedAt   string
+	Id          int    `json:"id"`
+	Nilai       int    `db:"nilai"`
+	MahasiswaID int    `db:"mahasiswa_id"`
+	MataKuliah  string `db:"mata_kuliah"`
+	CreatedAt   string `db:"created_at"`
+	UpdatedAt   string `db:"updated_at"`
 }
 
 func (t *tableMatkulNilai) ReadByIdMahasiswa(id int) (*ScanTableMatkulNilai, error) {
@@ -73,7 +73,7 @@ func (t *tableMatkulNilai) ReadByIdMahasiswa(id int) (*ScanTableMatkulNilai, err
 	defer rows.Close()
 	var scanTableMatkulNilai ScanTableMatkulNilai
 	for rows.Next() {
-		err := rows.Scan(&scanTableMatkulNilai.id, &scanTableMatkulNilai.nilai, &scanTableMatkulNilai.mahasiswaID, &scanTableMatkulNilai.mataKuliah, &scanTableMatkulNilai.createdAt, &scanTableMatkulNilai.updatedAt)
+		err := rows.Scan(&scanTableMatkulNilai.Id, &scanTableMatkulNilai.Nilai, &scanTableMatkulNilai.MahasiswaID, &scanTableMatkulNilai.MataKuliah, &scanTableMatkulNilai.CreatedAt, &scanTableMatkulNilai.UpdatedAt)
 		if err != nil {
 			return nil, err
 		}

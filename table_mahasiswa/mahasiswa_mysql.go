@@ -1,6 +1,7 @@
 package tablemahasiswa
 
 import (
+	"app_basis_data/table_matkul_nilai"
 	"context"
 	"database/sql"
 	"fmt"
@@ -34,8 +35,8 @@ func NewTableMahasiswa(db *sql.DB, ctx context.Context) (*tableMahasiswa, error)
 			fakultas TEXT NOT NULL,
 			is_active BOOLEAN DEFAULT 1,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-			)`)
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+			);`)
 	_, err := db.ExecContext(ctx, createtableMahasiswa)
 	if err != nil {
 		return nil, err
@@ -95,4 +96,35 @@ func (t *tableMahasiswa) DeleteMahasiswa(nim string) (sql.Result, error) {
 		return nil, err
 	}
 	return res, nil
+}
+
+type MahasiswaJoinMatkulNilai struct {
+	Mahasiswa   Mahasiswa
+	MatkulNilai table_matkul_nilai.ScanTableMatkulNilai
+}
+
+func (t *tableMahasiswa) ReadMahasiswaByIdAndMatkulNilai(id int) ([]MahasiswaJoinMatkulNilai, error) {
+	readMahasiswaByIdAndMatkulNilai := fmt.Sprintf(`
+	SELECT * FROM mahasiswa
+	LEFT JOIN matkul_nilai ON mahasiswa.id = matkul_nilai.mahasiswa_id
+	WHERE mahasiswa.id = %d`, id)
+	rows, err := t.db.QueryContext(t.ctx, readMahasiswaByIdAndMatkulNilai)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var mahasiswaJoinMatkulNilai []MahasiswaJoinMatkulNilai
+	for rows.Next() {
+		var mahasiswa Mahasiswa
+		var scanTableMatkulNilai table_matkul_nilai.ScanTableMatkulNilai
+		err := rows.Scan(&mahasiswa.ID, &mahasiswa.Nama, &mahasiswa.Nim, &mahasiswa.Email, &mahasiswa.Jurusan, &mahasiswa.Fakultas, &mahasiswa.IsActive, &mahasiswa.CreatedAt, &mahasiswa.UpdatedAt, &scanTableMatkulNilai.Id, &scanTableMatkulNilai.Nilai, &scanTableMatkulNilai.MahasiswaID, &scanTableMatkulNilai.MataKuliah, &scanTableMatkulNilai.CreatedAt, &scanTableMatkulNilai.UpdatedAt)
+		if err != nil {
+			return nil, err
+		}
+		mahasiswaJoinMatkulNilai = append(mahasiswaJoinMatkulNilai, MahasiswaJoinMatkulNilai{
+			Mahasiswa:   mahasiswa,
+			MatkulNilai: scanTableMatkulNilai,
+		})
+	}
+	return mahasiswaJoinMatkulNilai, nil
 }
