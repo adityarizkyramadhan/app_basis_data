@@ -34,7 +34,7 @@ func NewTableMahasiswa(db *sql.DB, ctx context.Context) (*tableMahasiswa, error)
 			fakultas TEXT NOT NULL,
 			is_active BOOLEAN DEFAULT 1,
 			created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+			updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 			)`)
 	_, err := db.ExecContext(ctx, createtableMahasiswa)
 	if err != nil {
